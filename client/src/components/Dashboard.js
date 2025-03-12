@@ -7,25 +7,28 @@ const Dashboard = ({ setAuth }) => {
   const getProfile = async () => {
     try {
       const res = await fetch("http://localhost:5000/dashboard/", {
-        method: "POST",
-        headers: { jwt_token: localStorage.token }
+        method: "GET",  // ✅ Changed from "POST" to "GET"
+        headers: {
+          "Authorization": `Bearer ${localStorage.token}`,  // ✅ Corrected JWT token format
+          "Content-Type": "application/json"
+        }
       });
 
       const parseData = await res.json();
-      setName(parseData.user_name);
+      setName(parseData?.user_name || "User"); // ✅ Added fallback in case user_name is undefined
     } catch (err) {
-      console.error(err.message);
+      console.error("Error fetching profile:", err.message);
     }
   };
 
-  const logout = async e => {
+  const logout = (e) => {
     e.preventDefault();
     try {
       localStorage.removeItem("token");
       setAuth(false);
       toast.success("Logout successfully");
     } catch (err) {
-      console.error(err.message);
+      console.error("Error during logout:", err.message);
     }
   };
 
@@ -37,7 +40,7 @@ const Dashboard = ({ setAuth }) => {
     <div>
       <h1 className="mt-5">Dashboard</h1>
       <h2>Welcome {name}</h2>
-      <button onClick={e => logout(e)} className="btn btn-primary">
+      <button onClick={logout} className="btn btn-primary">
         Logout
       </button>
     </div>

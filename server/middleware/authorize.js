@@ -1,25 +1,25 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-//this middleware will on continue on if the token is inside the local storage
-
-module.exports = function(req, res, next) {
+// Middleware to verify JWT token
+module.exports = function (req, res, next) {
   // Get token from header
   const token = req.header("jwt_token");
 
-  // Check if not token
+  // Check if token is missing
   if (!token) {
-    return res.status(403).json({ msg: "authorization denied" });
+    return res.status(403).json({ msg: "Authorization denied. No token provided." });
   }
 
-  // Verify token
   try {
-    //it is going to give use the user id (user:{id: user.id})
-    const verify = jwt.verify(token, process.env.jwtSecret);
+    // Verify token using JWT secret
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
 
-    req.user = verify.user;
+    // Attach user info to request object
+    req.user = verified.user;
     next();
   } catch (err) {
-    res.status(401).json({ msg: "Token is not valid" });
+    console.error("JWT Verification Error:", err.message);
+    res.status(401).json({ msg: "Invalid token." });
   }
 };

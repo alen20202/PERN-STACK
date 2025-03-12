@@ -1,6 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
-
+import { Link } from "react-router-dom"; // Removed Redirect (not used)
 import { toast } from "react-toastify";
 
 const Login = ({ setAuth }) => {
@@ -11,10 +10,10 @@ const Login = ({ setAuth }) => {
 
   const { email, password } = inputs;
 
-  const onChange = e =>
+  const onChange = (e) =>
     setInputs({ ...inputs, [e.target.name]: e.target.value });
 
-  const onSubmitForm = async e => {
+  const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
       const body = { email, password };
@@ -23,24 +22,25 @@ const Login = ({ setAuth }) => {
         {
           method: "POST",
           headers: {
-            "Content-type": "application/json"
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(body)
         }
       );
 
       const parseRes = await response.json();
+      console.log(parseRes); // ✅ Debugging: Check what backend returns
 
-      if (parseRes.jwtToken) {
-        localStorage.setItem("token", parseRes.jwtToken);
+      if (parseRes.token) { // ✅ Use 'token' instead of 'jwtToken' if API returns it
+        localStorage.setItem("token", parseRes.token);
         setAuth(true);
         toast.success("Logged in Successfully");
       } else {
         setAuth(false);
-        toast.error(parseRes);
+        toast.error(parseRes.message || "Login failed");
       }
     } catch (err) {
-      console.error(err.message);
+      console.error("Login Error:", err.message);
     }
   };
 
@@ -52,19 +52,23 @@ const Login = ({ setAuth }) => {
           type="text"
           name="email"
           value={email}
-          onChange={e => onChange(e)}
+          onChange={onChange}
           className="form-control my-3"
+          placeholder="Enter Email"
         />
         <input
           type="password"
           name="password"
           value={password}
-          onChange={e => onChange(e)}
+          onChange={onChange}
           className="form-control my-3"
+          placeholder="Enter Password"
         />
-        <button class="btn btn-success btn-block">Submit</button>
+        <button type="submit" className="btn btn-success btn-block">
+          Submit
+        </button>
       </form>
-      <Link to="/register">register</Link>
+      <Link to="/register">Register</Link>
     </Fragment>
   );
 };

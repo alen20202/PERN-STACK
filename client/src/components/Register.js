@@ -1,5 +1,5 @@
 import React, { Fragment, useState } from "react";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom"; // Removed Redirect (not used)
 import { toast } from "react-toastify";
 
 const Register = ({ setAuth }) => {
@@ -11,10 +11,10 @@ const Register = ({ setAuth }) => {
 
   const { email, password, name } = inputs;
 
-  const onChange = e =>
+  const onChange = (e) =>
     setInputs({ ...inputs, [e.target.name]: e.target.value });
 
-  const onSubmitForm = async e => {
+  const onSubmitForm = async (e) => {
     e.preventDefault();
     try {
       const body = { email, password, name };
@@ -23,23 +23,25 @@ const Register = ({ setAuth }) => {
         {
           method: "POST",
           headers: {
-            "Content-type": "application/json"
+            "Content-Type": "application/json"
           },
           body: JSON.stringify(body)
         }
       );
-      const parseRes = await response.json();
 
-      if (parseRes.jwtToken) {
-        localStorage.setItem("token", parseRes.jwtToken);
+      const parseRes = await response.json();
+      console.log(parseRes); // ✅ Debugging: Check what backend returns
+
+      if (parseRes.token) { // ✅ Use 'token' instead of 'jwtToken' if API returns it
+        localStorage.setItem("token", parseRes.token);
         setAuth(true);
-        toast.success("Register Successfully");
+        toast.success("Registered Successfully");
       } else {
         setAuth(false);
-        toast.error(parseRes);
+        toast.error(parseRes.message || "Registration failed");
       }
     } catch (err) {
-      console.error(err.message);
+      console.error("Register Error:", err.message);
     }
   };
 
@@ -51,29 +53,31 @@ const Register = ({ setAuth }) => {
           type="text"
           name="email"
           value={email}
-          placeholder="email"
-          onChange={e => onChange(e)}
+          placeholder="Enter Email"
+          onChange={onChange}
           className="form-control my-3"
         />
         <input
           type="password"
           name="password"
           value={password}
-          placeholder="password"
-          onChange={e => onChange(e)}
+          placeholder="Enter Password"
+          onChange={onChange}
           className="form-control my-3"
         />
         <input
           type="text"
           name="name"
           value={name}
-          placeholder="name"
-          onChange={e => onChange(e)}
+          placeholder="Enter Name"
+          onChange={onChange}
           className="form-control my-3"
         />
-        <button className="btn btn-success btn-block">Submit</button>
+        <button type="submit" className="btn btn-success btn-block">
+          Submit
+        </button>
       </form>
-      <Link to="/login">login</Link>
+      <Link to="/login">Login</Link>
     </Fragment>
   );
 };
